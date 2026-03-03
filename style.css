@@ -1,0 +1,128 @@
+/* BASE */
+body{
+  font-family:system-ui, Arial;
+  margin:0;
+  background:#094E6C;          /* fondo como el catálogo */
+  color:#222;
+}
+
+/* CONTENEDOR */
+.container{
+  max-width:1000px;
+  margin:30px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:18px;           /* un poco más similar a tus cards */
+  box-shadow:0 15px 35px rgba(0,0,0,.25);
+}
+
+/* TABLA */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th{
+  padding:10px;
+  text-align:left;
+  color:#fff;
+  background:linear-gradient(45deg, #094E6C, #118CC0); /* degradado */
+  border-bottom:1px solid #0b6f95;
+}
+
+td{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+}
+
+/* BOTONES */
+.btn{
+  display:inline-block;
+  padding:10px 14px;
+  background:linear-gradient(45deg, #094E6C, #118CC0); /* degradado */
+  color:#fff;
+  border-radius:50px;
+  text-decoration:none;
+  font-weight:600;
+  transition:.25s ease;
+}
+
+.btn:hover{
+  transform:scale(1.04);
+  box-shadow:0 0 15px rgba(17,140,192,.55);
+}
+
+.btn-sm{
+  padding:6px 10px;
+  background:linear-gradient(45deg, #191970, #118CC0); /* navy + azul */
+  color:#fff;
+  border-radius:50px;
+  text-decoration:none;
+  font-weight:600;
+  transition:.25s ease;
+}
+
+.btn-sm:hover{
+  transform:translateY(-1px);
+  box-shadow:0 0 12px rgba(25,25,112,.35);
+}
+
+.danger{
+  background:#b00020;
+  border:none;
+  color:#fff;
+  border-radius:50px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+
+/* UTILIDADES */
+.inline{ display:inline; }
+
+.actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* FORMULARIOS */
+label{
+  display:block;
+  margin-top:12px;
+  font-weight:700;
+  color:#191970;                /* títulos en navy */
+}
+
+input, select{
+  width:100%;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:12px;
+  outline:none;
+}
+
+input:focus, select:focus{
+  border-color:#118CC0;
+  box-shadow:0 0 0 4px rgba(17,140,192,.18);
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+/* ALERTA */
+.alert{
+  background:#e9fbff;           /* suave */
+  border:1px solid #bfefff;
+  border-left:6px solid #40E0D0; /* acento turquesa */
+  padding:10px;
+  border-radius:12px;
+  margin-top:12px;
+  color:#0b3f56;
+}
