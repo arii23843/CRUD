@@ -15,12 +15,17 @@ $values = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+
   foreach ($values as $k => $_) {
     $values[$k] = trim((string)($_POST[$k] ?? $values[$k]));
   }
 
+  $values['habitacion'] = mb_strtolower(trim($values['habitacion']), 'UTF-8');
+
+  // Validaciones 
   if ($values['nombre_cliente'] === '') $errores[] = "El nombre del cliente es obligatorio.";
-  if ($values['habitacion'] === '') $errores[] = "La habitación es obligatoria.";
+  if ($values['habitacion'] === '') $errores[] = "El tipo de habitación es obligatorio.";
 
   [$okf, $msgf] = validar_fechas($values['fecha_entrada'], $values['fecha_salida']);
   if (!$okf) $errores[] = $msgf;
@@ -28,11 +33,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   [$okp, $msgp] = validar_personas($values['personas']);
   if (!$okp) $errores[] = $msgp;
 
+  // Validación de disponibilidad por fechas 
+  $conn = db();
+
+  $check = $conn->prepare("
+    SELECT COUNT(*) as total
+    FROM reservas
+    WHERE habitacion = ?
+      AND estado != 'cancelada'
+      AND (? < fecha_salida AND ? > fecha_entrada)
+  ");
+
+  $check->bind_param(
+    "sss",
+    $values['habitacion'],
+    $values['fecha_entrada'],
+    $values['fecha_salida'],
+  );
+
+  $check->execute();
+  $result = $check->get_result()->fetch_assoc();
+
+  if ((int)$result['total'] > 0) {
+    $errores[] = "La habitación ya está reservada en ese rango de fechas.";
+  }
+
+  // Insertar 
   if (!$errores) {
-    $conn = db();
     $stmt = $conn->prepare("INSERT INTO reservas
       (nombre_cliente, telefono, email, habitacion, fecha_entrada, fecha_salida, personas, estado)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
     $stmt->bind_param(
       "ssssssis",
       $values['nombre_cliente'],
@@ -44,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $values['personas'],
       $values['estado']
     );
+
     $stmt->execute();
     redirect('index.php');
   }
@@ -62,10 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>Nueva reserva</h1>
     <a class="btn" href="habitaciones.php">← Volver</a>
 
-    <?php if($errores): ?>
+    <?php if ($errores): ?>
       <div class="alert">
         <ul>
-          <?php foreach($errores as $e): ?><li><?= h($e) ?></li><?php endforeach; ?>
+          <?php foreach ($errores as $e): ?>
+            <li><?= h($e) ?></li>
+          <?php endforeach; ?>
         </ul>
       </div>
     <?php endif; ?>
@@ -80,8 +114,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label>Email</label>
       <input type="email" name="email" value="<?= h($values['email']) ?>">
 
-      <label>Habitación</label>
-      <input name="habitacion" value="<?= h($values['habitacion']) ?>" required placeholder="Ej. 101, Suite 2, etc.">
+      <label>Tipo de habitación</label>
+      <select name="habitacion" required>
+        <?php
+          $tipos = ['sencilla','doble','suite','ejecutiva','familiar','vista premium al mar'];
+          foreach ($tipos as $t):
+        ?>
+          <option value="<?= $t ?>" <?= ($values['habitacion'] === $t ? 'selected' : '') ?>>
+            <?= ucfirst($t) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
 
       <div class="grid">
         <div>
@@ -99,8 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <label>Estado</label>
       <select name="estado">
-        <?php foreach(['pendiente','confirmada','cancelada'] as $st): ?>
-          <option value="<?= $st ?>" <?= $values['estado']===$st ? 'selected' : '' ?>><?= ucfirst($st) ?></option>
+        <?php foreach (['pendiente','confirmada','cancelada'] as $st): ?>
+          <option value="<?= $st ?>" <?= ($values['estado'] === $st ? 'selected' : '') ?>>
+            <?= ucfirst($st) ?>
+          </option>
         <?php endforeach; ?>
       </select>
 
